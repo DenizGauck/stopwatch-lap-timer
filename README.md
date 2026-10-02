@@ -35,3 +35,10 @@ Timing code that calls `Date.now()` inline is untestable: any test that asserts 
 `split()`'s baseline is the *previous split's total*, or — for the first split after a `stop`/`start` — the elapsed time accumulated *before* the current run. So if you run 100ms, stop, resume, then split after 20ms, that first split reads `20`, not `120`. This keeps each split meaningful as "time in this running interval" but means splits do not span stop/start boundaries. If you need continuous splits across stops, don't stop the watch.
 
 `start()` returns the elapsed time accumulated before the current run (not the live elapsed), and `stop()` returns the new total. These are the values the state machine actually transitions through; callers who need the live reading should use the `elapsed` getter.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
